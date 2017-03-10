@@ -11,6 +11,8 @@ const propTypes = {
     date: PropTypes.number.isRequired,
     numRetweets: PropTypes.number.isRequired,
     numFavorites:PropTypes.number.isRequired,
+    pressFavorite:PropTypes.bool.isRequired,
+    pressRetweet:PropTypes.bool.isRequired,
     onFavorite: PropTypes.func.isRequired,
     onRetweet: PropTypes.func.isRequired,
     onReplyTweet: PropTypes.func.isRequired
@@ -21,8 +23,8 @@ class Message extends Component {
         super(props);
 
         this.state = {
-            pressFavorite: false,
-            pressRetweet: false
+            pressFavorite: this.props.pressFavorite,
+            pressRetweet: this.props.pressRetweet
         }
 
         this.onPressRetweet = this.onPressRetweet.bind(this)

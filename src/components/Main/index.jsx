@@ -1,5 +1,4 @@
 import React, {Component, PropTypes} from 'react'
-import uuid from 'uuid'
 import firebase from 'firebase'
 
 import MessageList from '../MessageList'
@@ -31,21 +30,65 @@ class Main extends Component {
     }
 
     componentWillMount() {
-        const messagesRef = firebase.database().ref().child("messages")
 
-        messagesRef.on('child_added', snapshot => {
-            this.setState({
-                messages: this.state.messages.concat(snapshot.val()),
-                openText: false
-            })
-        })
+        firebase.database().ref('/retweetsByUser/' + this.state.user.uid).once('value').then(snapshot => {
+            var retweets = [];
+
+            snapshot.forEach(function(childSnapshot) {
+                retweets.push(childSnapshot.val())
+            });
+
+            let user = Object.assign({}, this.state.user)
+            user.retweets = retweets
+
+            firebase.database().ref('/favoritesByUser/' + this.state.user.uid).once('value').then(snapshot => {
+                var favorites = [];
+
+                snapshot.forEach(function(childSnapshot) {
+                    favorites.push(childSnapshot.val())
+                });
+
+                user.favorites = favorites
+
+                this.setState({
+                    user
+                })
+
+                const messagesRef = firebase.database().ref().child("messages")
+
+                messagesRef.on('child_added', snapshot => {
+                    this.setState({
+                        messages: this.state.messages.concat(snapshot.val()),
+                        openText: false
+                    })
+                })
+
+                messagesRef.on('child_changed', snapshot => {
+
+                    let messages = this.state.messages.map(msg => {
+                        if (msg.id === snapshot.key) {
+                            return snapshot.val()
+                        } else {
+                            return msg
+                        }
+                    })
+
+                    this.setState({
+                        messages
+                    })
+                });
+            });
+        });
     }
 
     handleSendText(event) {
         event.preventDefault();
 
+        const messagesRef = firebase.database().ref().child("messages")
+        const messageID = messagesRef.push()
+
         let newMessage = {
-            id: uuid.v4(),
+            id: messageID.key,
             text: event.target.text.value,
             picture: this.props.user.photoURL,
             displayName: this.props.user.displayName,
@@ -55,8 +98,6 @@ class Main extends Component {
             favorites: 0
         }
 
-        const messagesRef = firebase.database().ref().child("messages")
-        const messageID = messagesRef.push()
         messageID.set(newMessage)
     }
 
@@ -75,19 +116,28 @@ class Main extends Component {
     handleRetweet(msgId) {
         let alreadyRetweeted = this.state.user.retweets.filter(rt => rt === msgId)
         if (alreadyRetweeted.length === 0) {
-            let messages = this.state.messages.map(msg => {
+            let messages = this.state.messages.filter(msg => {
                 if (msg.id === msgId) {
-                    msg.retweets++
+                    return msg
                 }
                 return msg
             })
+
+            const message = messages[0]
+            message.retweets++
+
+            var updates = {};
+            updates['/messages/' + msgId] = message;
+            firebase.database().ref().update(updates)
+
+            const retweetsRef = firebase.database().ref().child("retweetsByUser/" + this.state.user.uid)
+            retweetsRef.push().set(msgId)
 
             let user = Object.assign({}, this.state.user)
             user.retweets.push(msgId)
 
             this.setState({
-                user,
-                messages
+                user
             })
         }
     }
@@ -95,18 +145,26 @@ class Main extends Component {
     handleFavorite(msgId) {
         let alreadyFavorited = this.state.user.favorites.filter(fav => fav === msgId)
         if (alreadyFavorited.length === 0) {
-            let messages = this.state.messages.map(msg => {
+            let messages = this.state.messages.filter(msg => {
                 if (msg.id === msgId) {
-                    msg.favorites++
+                    return msg
                 }
-                return msg
             })
+
+            const message = messages[0]
+            message.favorites++
+
+            var updates = {};
+            updates['/messages/' + msgId] = message;
+            firebase.database().ref().update(updates)
+
+            const favoritesRef = firebase.database().ref().child("favoritesByUser/" + this.state.user.uid)
+            favoritesRef.push().set(msgId)
 
             let user = Object.assign({}, this.state.user)
             user.favorites.push(msgId)
 
             this.setState({
-                messages,
                 user
             })
         }
@@ -146,6 +204,8 @@ class Main extends Component {
                     onRetweet={this.handleRetweet}
                     onFavorite={this.handleFavorite}
                     onReplyTweet={this.handleReplyTweet}
+                    userFavorites={this.state.user.favorites}
+                    userRetweets={this.state.user.retweets}
                 />
             </div>
         )
