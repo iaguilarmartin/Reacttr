@@ -101,27 +101,10 @@ class Main extends Component {
         messageID.set(newMessage)
     }
 
-    handleCloseText(event) {
-        event.preventDefault();
-
-        this.setState({openText: false})
-    }
-
-    handleOpenText (event) {
-        event.preventDefault()
-
-        this.setState({openText: true})
-    }
-
     handleRetweet(msgId) {
         let alreadyRetweeted = this.state.user.retweets.filter(rt => rt === msgId)
         if (alreadyRetweeted.length === 0) {
-            let messages = this.state.messages.filter(msg => {
-                if (msg.id === msgId) {
-                    return msg
-                }
-                return msg
-            })
+            let messages = this.state.messages.filter(msg => msg.id === msgId);
 
             const message = messages[0]
             message.retweets++
@@ -145,11 +128,7 @@ class Main extends Component {
     handleFavorite(msgId) {
         let alreadyFavorited = this.state.user.favorites.filter(fav => fav === msgId)
         if (alreadyFavorited.length === 0) {
-            let messages = this.state.messages.filter(msg => {
-                if (msg.id === msgId) {
-                    return msg
-                }
-            })
+            let messages = this.state.messages.filter(msg => msg.id === msgId);
 
             const message = messages[0]
             message.favorites++
@@ -175,6 +154,18 @@ class Main extends Component {
             openText: true,
             usernameToReply
         })
+    }
+
+    handleOpenText (event) {
+        event.preventDefault()
+
+        this.setState({openText: true, usernameToReply: ""})
+    }
+
+    handleCloseText(event) {
+        event.preventDefault();
+
+        this.setState({openText: false})
     }
 
     renderOpenText() {

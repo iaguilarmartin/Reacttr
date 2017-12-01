@@ -3,16 +3,16 @@ import styles from './profile.css'
 
 const propTypes = {
     username: PropTypes.string.isRequired,
-    emailAddress: PropTypes.string.isRequired,
-    location: PropTypes.string.isRequired,
-    picture: PropTypes.string.isRequired,
+    emailAddress: PropTypes.string,
+    location: PropTypes.string,
+    picture: PropTypes.string,
     displayName: PropTypes.string.isRequired
 }
 
 function Profile ({username, emailAddress, location, picture, displayName}) {
     return (
         <div className={styles.root}>
-            <img className={styles.avatar} src={picture} />
+            {picture && (<img className={styles.avatar} src={picture} />)}
             <span className={styles.name}>{displayName}</span>
             <ul className={styles.data}>
                 <li>

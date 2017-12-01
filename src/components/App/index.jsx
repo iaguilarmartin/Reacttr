@@ -24,7 +24,6 @@ class App extends Component {
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 this.setState({ user })
-                console.log(user)
             } else {
                 this.setState({user: null})
             }
@@ -63,15 +62,15 @@ class App extends Component {
                         }
                     }}/>
 
-                    <Match pattern="/profile" render={() => (
-                        <Profile
+                    <Match pattern="/profile" render={() => {
+                        return this.state.user && (<Profile
                             picture={this.state.user.photoURL}
                             username={this.state.user.email.split('@')[0]}
                             displayName={this.state.user.displayName}
                             location={this.state.user.location}
                             emailAddress={this.state.user.email}
-                        />
-                    )} />
+                        />);
+                    }} />
 
                     <Match pattern="/user/:username" render={({ params }) => (
                         <Profile

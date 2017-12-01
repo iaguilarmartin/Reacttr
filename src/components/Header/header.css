@@ -12,3 +12,8 @@
     color: #fff;
     font-size: 14pt;
 }
+
+.link {
+    outline: none !important;
+    text-decoration: none;
+}

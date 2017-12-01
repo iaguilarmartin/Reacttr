@@ -9,15 +9,16 @@ const propTypes = {
 
 function InputText({usernameToReply, onCloseText, onSendText}) {
     return (
-        <form className={styles.form} onSubmit={onSendText}>
-            <textarea className={styles.text} name="text">
-                {usernameToReply ? `@${usernameToReply} ` : ''}
-            </textarea>
-            <div className={styles.buttons}>
-                <button className={styles.close} onClick={onCloseText}>Cerrar</button>
-                <button className={styles.send} type="submit">Enviar</button>
-            </div>
-        </form>
+        <div className={styles.container}>
+            <form className={styles.form} onSubmit={onSendText}>
+                <textarea autoFocus className={styles.text} defaultValue={usernameToReply ? `@${usernameToReply} ` : ''} name="text">
+                </textarea>
+                <div className={styles.buttons}>
+                    <button className={styles.close} onClick={onCloseText}>Cerrar</button>
+                    <button className={styles.send} type="submit">Enviar</button>
+                </div>
+            </form>
+        </div>
     )
 }
 
